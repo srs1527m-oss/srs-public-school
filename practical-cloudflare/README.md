@@ -29,8 +29,12 @@ Settings > Domains & Routes > Add > Custom domain. (Domain Cloudflare DNS mein h
 
 ## Zaroori baatein
 
-- **Free plan par CPU limit**: password check mein 100,000-round PBKDF2 chalta hai. Agar login ya "Create these IDs" par
-  "server problem" aaye, to Workers Paid plan ($5/month) lo.
+- **Free plan par chalta hai**: Workers Free (10 ms CPU) ke hisaab se banaya hai. Password halka hash (5,000 rounds) + server ke secret
+  (`REGISTER_SETUP_KEY`) se HMAC hota hai, isliye sirf database chura lene se password nahi nikalte.
+  **`REGISTER_SETUP_KEY` baad mein mat badalna**, warna saare password kaam karna band kar denge (tab admin ko `/setup` se
+  naya password aur teachers ko "New temporary password" dena padega).
+- "Create these IDs" ek baar mein 2 ID banata hai aur page khud baaki repeat kar leta hai; thoda ruk kar saari 9 aa jati hain.
+- Free limits: D1 5 GB, R2 10 GB, Workers 1 lakh requests per day. Ek school ke liye bahut hai.
 - Admin password bhool jao to `/setup` dobara kholo, wahi setup code do: admin ka password reset ho jata hai.
 - Photos private hain: sirf login ke baad owner teacher ya admin ko dikhti hain. R2 bucket ko public mat karo.
 - Backup: `npx wrangler d1 export srs-practical-register --remote --output=backup.sql` mahine mein ek baar.

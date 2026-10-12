@@ -73,10 +73,17 @@ function seedList() {
   return out;
 }
 
-/* ---------- passwords: PBKDF2-SHA256 (bcrypt/argon2 are not available in Workers) ---------- */
-const ITER = 100000;   // the most Workers allows
+/* ---------- passwords ----------
+   Free-plan Workers get only ~10 ms of CPU per request, so the slow hash is kept light (5,000 rounds of PBKDF2-SHA256)
+   and made strong another way: the password is first run through HMAC-SHA256 with a server-side secret (the setup key).
+   A copy of the database alone is then useless for guessing passwords. Wrong guesses online are limited to 8 per 15 minutes.
+   On a paid plan, raise ITER (the count is stored with each hash, so old hashes keep working). */
+const ITER = 5000;
+let PEPPER = '';   // set from the REGISTER_SETUP_KEY secret on every request
 async function derive(pw, salt, iter) {
-  const key = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveBits']);
+  const hk = await crypto.subtle.importKey('raw', enc.encode(PEPPER), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const pre = new Uint8Array(await crypto.subtle.sign('HMAC', hk, enc.encode(pw)));
+  const key = await crypto.subtle.importKey('raw', pre, 'PBKDF2', false, ['deriveBits']);
   return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, key, 256));
 }
 async function hashPw(pw) {
@@ -438,7 +445,9 @@ async function api(c) {
     case 'seed.create': {
       await needPost(c); await needAdmin(c);
       const made = [];
+      // Two per request keeps each request inside the free plan's CPU limit; the page asks again until none are left.
       for (const t of seedList()) {
+        if (made.length >= 2) break;
         if (await DB.prepare('SELECT 1 AS x FROM users WHERE username = ?').bind(t.username).first()) continue;
         const temp = tempPassword();
         await DB.prepare("INSERT INTO users (username, name, role, pass_hash, must_change, active, assign, created_at) VALUES (?, ?, 'teacher', ?, 1, 1, ?, ?)")
@@ -550,9 +559,13 @@ async function setup(c) {
 
 export default {
   async fetch(req, env, ctx) {
+    PEPPER = typeof env.REGISTER_SETUP_KEY === 'string' ? env.REGISTER_SETUP_KEY : '';
     const url = new URL(req.url), c = { req, env, ctx, cookie: '' };
     try {
-      if (url.pathname === '/api') return await api(c);
+      if (url.pathname === '/api') {
+        if (PEPPER.length < 12) throw new ApiError('config', 'The register is not configured: the REGISTER_SETUP_KEY secret is missing.', 503);
+        return await api(c);
+      }
       if (url.pathname === '/photo') return await photo(c);
       if (url.pathname === '/setup') return await setup(c);
       return await env.ASSETS.fetch(req);

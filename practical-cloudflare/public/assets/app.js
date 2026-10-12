@@ -687,7 +687,9 @@ async function loadSeed() {
 async function createSeed(el) {
   el.disabled = true; formMsg('teacherMsg', 'Creating…');
   try {
-    const rows = (await api('seed.create', {})).created || [];
+    // The server makes two IDs per request (free-plan CPU limit), so ask until none are left.
+    const rows = [];
+    for (let i = 0; i < 20; i++) { const got = (await api('seed.create', {})).created || []; if (!got.length) break; rows.push(...got); }
     $('tempPw').hidden = false;
     $('tempPw').innerHTML = `<strong>${rows.length} IDs created.</strong> Note these down now: the temporary passwords are shown only once. Each teacher sets their own password at first sign-in.
       <div class="table-wrap" style="margin-block:10px"><table><thead><tr><th>Teacher</th><th>ID</th><th>Temporary password</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r.name)}</td><td><span class="temp-pw">${esc(r.username)}</span></td><td><span class="temp-pw">${esc(r.tempPassword)}</span></td></tr>`).join('')}</tbody></table></div>
