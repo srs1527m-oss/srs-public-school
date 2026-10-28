@@ -27,9 +27,14 @@ jobs:
       - name: Check secrets
         id: guard
         run: |
+          [ -n "$CLOUDFLARE_API_TOKEN" ] && echo "CLOUDFLARE_API_TOKEN: found" || echo "CLOUDFLARE_API_TOKEN: MISSING"
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] && echo "CLOUDFLARE_ACCOUNT_ID: found" || echo "CLOUDFLARE_ACCOUNT_ID: MISSING"
+          echo "REGISTER_SETUP_KEY length: ${#REGISTER_SETUP_KEY} (needs 12 or more)"
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ "${#REGISTER_SETUP_KEY}" -lt 12 ]; then
             echo "Secrets missing (or REGISTER_SETUP_KEY shorter than 12 characters). Skipping deploy."
             echo "go=no" >> "$GITHUB_OUTPUT"
+            echo "::error::A secret is missing. See the lines above."
+            exit 1
           else
             echo "go=yes" >> "$GITHUB_OUTPUT"
           fi
