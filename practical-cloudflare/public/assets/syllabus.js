@@ -3,7 +3,7 @@
 /* ---------- Practical lists, session 2026-27 (wording shortened). CBSE first, UP Board after. ---------- */
 // A class key is the class number for CBSE ('12') and the same with a "u" prefix for UP Board ('u12').
 // ROMAN gives the label shown everywhere: board plus class.
-const ROMAN = { '9':'CBSE IX', '10':'CBSE X', '11':'CBSE XI', '12':'CBSE XII', 'u9':'UP IX', 'u10':'UP X', 'u11':'UP XI', 'u12':'UP XII' };
+const ROMAN = { '6':'CBSE VI', '7':'CBSE VII', '8':'CBSE VIII', 'u6':'UP VI', 'u7':'UP VII', 'u8':'UP VIII', '9':'CBSE IX', '10':'CBSE X', '11':'CBSE XI', '12':'CBSE XII', 'u9':'UP IX', 'u10':'UP X', 'u11':'UP XI', 'u12':'UP XII' };
 const BOARDS = { cbse:'CBSE', up:'UP Board' };
 const boardOf = key => key[0] === 'u' ? 'up' : 'cbse';
 const rawCls = key => key.replace(/^u/, '');
@@ -20,7 +20,55 @@ const PHY_NOTE = 'The record needs at least 8 experiments (4 from each section) 
 const CHEM_NOTE = 'Practical exam, 30 marks: volumetric analysis 8, salt analysis 8, content-based experiment 6, project 4, class record and viva 4.';
 const BIO_NOTE = 'Practical exam, 30 marks: major experiment 5, minor experiment 4, slide preparation 5, spotting 7, record and viva 4, project and viva 5.';
 
+/* Classes VI to VIII: Science activities from the NCERT books. Neither board prints a fixed practical list for these classes,
+   so this is a starter list of common NCERT activities. Replace the wording with the school's own list if it differs. */
+const LOW_ACT = {
+  '6': [
+    'Test food items for starch (iodine), protein and fat',
+    'Separate mixtures: sieving, filtration, evaporation and decantation',
+    'Sort materials by properties: hard or soft, soluble or insoluble, transparent or opaque',
+    'Make a simple electric circuit with a cell, bulb and switch; test conductors and insulators',
+    'Explore magnets: poles, attraction and repulsion, magnetic and non-magnetic materials',
+    'Shadows and a pinhole camera: how light travels in a straight line',
+    'Measure length, curved lines and time with a ruler, thread and stopwatch',
+    'Germinate seeds and observe the parts of a seedling',
+    'Study the parts of a flowering plant: root, stem, leaf and flower',
+    'Model of the water cycle: evaporation and condensation'
+  ],
+  '7': [
+    'Test acids and bases with litmus, turmeric and china rose indicators',
+    'Physical and chemical changes: rusting, burning magnesium, vinegar with baking soda',
+    'Conduction, convection and radiation of heat: simple demonstrations',
+    'Test a leaf for starch to show photosynthesis',
+    'Observe stomata in a leaf peel under the microscope',
+    'Use a compound microscope and observe onion peel cells',
+    'Heating effect of electric current; make a fuse or a simple electromagnet',
+    'Speed, distance and time: measure the speed of a moving trolley or ball',
+    'Make a simple pendulum and find its time period',
+    'Soil: water absorption, soil profile and soil particles',
+    'Transpiration in plants using a polythene bag over a leafy twig',
+    'Make a simple wind vane or anemometer'
+  ],
+  '8': [
+    'Test for metals and non-metals: lustre, hardness, conductivity, sonority',
+    'Do liquids conduct electricity? Test with a tester; chemical effects of current',
+    'Electroplating of copper using copper sulphate solution',
+    'Combustion: flame zones of a candle and conditions needed for burning',
+    'Observe microorganisms in pond water and curd under the microscope',
+    'Effect of force: pressure and its dependence on area',
+    'Friction on different surfaces: rolling and sliding',
+    'Sound is made by vibrations: tuning fork, rubber band and drum demonstrations',
+    'Laws of reflection of light using a plane mirror; make a kaleidoscope',
+    'Cell structure: onion peel and cheek cell temporary mounts',
+    'Crop and soil: sow seeds and compare different soil types',
+    'Air and water pollution: simple tests and observations'
+  ]
+};
+const lowDef = (n, board) => ({ science: { note: `Class ${n} ${board}: starter list of NCERT activities (no fixed board list). Log other work with "Other" and a short description.`, groups: [{ k:'A', name:'Activities', items: LOW_ACT[n] }] } });
+
 const SYL = {
+  '6': lowDef('6', 'CBSE'), '7': lowDef('7', 'CBSE'), '8': lowDef('8', 'CBSE'),
+  'u6': lowDef('6', 'UP Board'), 'u7': lowDef('7', 'UP Board'), 'u8': lowDef('8', 'UP Board'),
   '9': { science: { note:'13 experiments, to be done alongside the theory chapters. Practical work counts for 5 marks of internal assessment (Subject Enrichment).', groups:[
     { k:'E', name:'Experiments', items:[
       'True solution, suspension and colloid: prepare and compare (transparency, filtration, stability, Tyndall effect)',

@@ -7,7 +7,7 @@ for (const cls of Object.keys(SYL)) for (const subj of Object.keys(SYL[cls])) fo
   g.items.forEach((title, i) => ITEMS.set(`${cls}.${subj}.${g.k}.${i + 1}`, { cls, subj, group:g, n:i + 1, title }));
 const pidOf = (cls, subj, g, n) => `${cls}.${subj}.${g.k}.${n}`;
 const groupNeed = g => g.need || g.items.length;
-const RN = { '9':'IX', '10':'X', '11':'XI', '12':'XII' };
+const RN = { '6':'VI', '7':'VII', '8':'VIII', '9':'IX', '10':'X', '11':'XI', '12':'XII' };
 // The only two server addresses the page uses. A port to another backend changes just these.
 const API_URL = '/api', PHOTO_URL = '/photo';
 

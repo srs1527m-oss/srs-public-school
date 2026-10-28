@@ -28,6 +28,7 @@ function safeEq(a, b) {
 }
 
 const CLASSES = {
+  '6': ['science'], '7': ['science'], '8': ['science'], u6: ['science'], u7: ['science'], u8: ['science'],
   '9': ['science'], '10': ['science'], '11': ['physics', 'chemistry', 'biology'], '12': ['physics', 'chemistry', 'biology'],
   u9: ['science'], u10: ['science'], u11: ['physics', 'chemistry', 'biology'], u12: ['physics', 'chemistry', 'biology'],
 };
