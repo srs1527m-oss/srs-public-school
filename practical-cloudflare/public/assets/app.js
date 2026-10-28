@@ -171,8 +171,8 @@ const meter = (a, b) => b > 0
 /* ---------- overview ---------- */
 function renderOverview() {
   const ob = state.ovBoard, teacher = state.role === 'teacher';
-  const KEYS = Object.keys(SYL).filter(k => (!ob || boardOf(k) === ob) && classSubjects(k).some(sj => comboOK(k, sj)));
-  const all = state.sessions.filter(s => !ob || boardOf(s.cls) === ob), idx = buildIndex(), t = tally(all);
+  const KEYS = Object.keys(SYL).filter(k => inBoard(k, ob) && classSubjects(k).some(sj => comboOK(k, sj)));
+  const all = state.sessions.filter(s => inBoard(s.cls, ob)), idx = buildIndex(), t = tally(all);
   const month = todayStr().slice(0, 7);
   const thisMonth = all.filter(s => s.date.slice(0, 7) === month).length;
   let cov = 0, need = 0, combos = 0;
@@ -300,7 +300,7 @@ function renderEntries() {
   sel.innerHTML = '<option value="">All</option>' + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
   sel.value = names.includes(keep) ? keep : ''; state.filt.teacher = sel.value;
   const f = state.filt;
-  const list = sorted(state.sessions.filter(s => (!f.board || boardOf(s.cls) === f.board) && (!f.cls || rawCls(s.cls) === f.cls) && (!f.subj || s.subj === f.subj) && (!f.teacher || tname(s) === f.teacher)));
+  const list = sorted(state.sessions.filter(s => inBoard(s.cls, f.board) && (!f.cls || rawCls(s.cls) === f.cls) && (!f.subj || s.subj === f.subj) && (!f.teacher || tname(s) === f.teacher)));
   $('entriesAside').textContent = `${list.length} of ${state.sessions.length} entries`;
   const acts = list.some(canModify);
   $('entriesTable').innerHTML = list.length ? `<table class="t-entries"><thead><tr><th>Date</th><th>Class</th><th>Subject</th><th>Practical</th><th>Teacher</th><th class="n">Present</th><th class="n">Files</th><th>Photos</th>${acts ? '<th></th>' : ''}</tr></thead><tbody>${list.map(s => `<tr>
@@ -326,7 +326,7 @@ function fillPracticals() {
   const def = SYL[cls][subj];
   $('fPractical').innerHTML = '<option value="">Choose a practical</option>' + def.groups.map(g =>
     `<optgroup label="${esc(g.name)}">${g.items.map((t, i) => `<option value="${pidOf(cls, subj, g, i + 1)}">${numOf(g, i)}. ${esc(t)}</option>`).join('')}</optgroup>`).join('') +
-    `<optgroup label="Outside the ${BOARDS[boardOf(cls)]} list"><option value="other">Other practical work</option></optgroup>`;
+    `<optgroup label="Outside the ${isLow(cls) ? 'activity' : BOARDS[boardOf(cls)]} list"><option value="other">Other practical work</option></optgroup>`;
   $('fPractical').dataset.sig = cls + '|' + subj;
   $('otherWrap').hidden = true;
 }
@@ -334,7 +334,7 @@ function fillPracticals() {
 function refreshFormSelects() {
   if (state.editing || !state.user) return;
   const a = myCombos(), me = state.user;
-  const boards = Object.keys(BOARDS).filter(b => !a || a.some(x => boardOf(x.cls) === b));
+  const boards = Object.keys(BOARDS).filter(b => !a || a.some(x => isLow(x.cls) || boardOf(x.cls) === b));
   const want = $('fBoard').dataset.want || null;   // the board this person used last time
   if (want) delete $('fBoard').dataset.want;
   const board = setOptions($('fBoard'), boards.map(b => [b, BOARDS[b]]), want);
@@ -371,7 +371,7 @@ function startEdit(key) {
   if (!s || !canModify(s) || state.saving) return;
   state.editing = { key, id:s.id };
   const b = boardOf(s.cls), c = rawCls(s.cls);
-  setOptions($('fBoard'), [[b, BOARDS[b]]], b);
+  setOptions($('fBoard'), [[b, isLow(s.cls) ? 'All boards' : BOARDS[b]]], b);
   setOptions($('fClass'), [[c, `${RN[c]} (${c})`]], c);
   setOptions($('fSubj'), [[s.subj, SUBJ[s.subj].name]], s.subj);
   setOptions($('fTeacher'), [[String(s.uid), tname(s)]], String(s.uid));
